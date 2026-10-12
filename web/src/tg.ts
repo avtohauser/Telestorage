@@ -19,6 +19,10 @@ interface WebApp {
   openTelegramLink(url: string): void;
   downloadFile?(params: { url: string; file_name: string }, cb?: (accepted: boolean) => void): void;
   HapticFeedback?: { impactOccurred(style: string): void; notificationOccurred(type: string): void };
+  onEvent(event: string, cb: () => void): void;
+  setHeaderColor?(color: string): void;
+  setBackgroundColor?(color: string): void;
+  setBottomBarColor?(color: string): void;
   BackButton: { show(): void; hide(): void; onClick(cb: () => void): void; offClick(cb: () => void): void };
 }
 
@@ -64,4 +68,25 @@ export function downloadUrl(path: string, name: string) {
   } else {
     window.open(url, "_blank");
   }
+}
+
+/** Тема avr по colorScheme Telegram; шапку и фон Telegram красим в цвет «земли». */
+export function applyTheme() {
+  const set = () => {
+    const scheme = tg?.colorScheme ?? (matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+    document.documentElement.setAttribute("data-theme", scheme);
+    const ground = scheme === "dark" ? "#0B4248" : "#E9EFEF";
+    document.querySelector('meta[name="theme-color"]')?.setAttribute("content", ground);
+    try {
+      if (tg?.isVersionAtLeast("6.1")) {
+        tg.setHeaderColor?.(ground);
+        tg.setBackgroundColor?.(ground);
+      }
+      if (tg?.isVersionAtLeast("7.10")) tg.setBottomBarColor?.(ground);
+    } catch {
+      /* старые клиенты */
+    }
+  };
+  set();
+  tg?.onEvent("themeChanged", set);
 }

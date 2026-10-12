@@ -1,5 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { Api, type FolderItem } from "../api";
+import { Loader } from "../brand";
+import { Icon } from "./Icon";
 import { Overlay } from "./Sheet";
 
 /** Выбор папки назначения. exclude — папка, которую перемещаем (её поддерево скрывается). */
@@ -36,23 +38,21 @@ export function MovePicker({ exclude, onPick, onClose }: { exclude?: number; onP
   return (
     <Overlay onClose={onClose}>
       <div className="sheet-head">
-        <div className="sheet-title">Переместить в…</div>
+        <div className="avr-title">Куда переместить</div>
       </div>
-      <div className="picker">
+      <div className="sheet-actions picker">
         <button className="sheet-btn" onClick={() => pick(null)}>
-          <span className="sheet-icon">🏠</span>Корень
+          <Icon name="home" />
+          Мои файлы
         </button>
-        {folders === null && <div className="muted center pad">Загрузка…</div>}
+        {folders === null && <Loader />}
         {rows.map(({ f, depth }) => (
-          <button key={f.id} className="sheet-btn" style={{ paddingLeft: 16 + depth * 18 }} onClick={() => pick(f.id)}>
-            <span className="sheet-icon">📁</span>
-            {f.name}
+          <button key={f.id} className="sheet-btn" style={{ paddingLeft: 20 + depth * 20 }} onClick={() => pick(f.id)}>
+            <Icon name="folder" />
+            <span className="ellipsis">{f.name}</span>
           </button>
         ))}
       </div>
-      <button className="sheet-btn cancel" onClick={onClose}>
-        Отмена
-      </button>
     </Overlay>
   );
 }

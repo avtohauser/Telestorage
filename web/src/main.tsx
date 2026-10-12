@@ -1,9 +1,11 @@
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { App } from "./App";
+import "./brand.css";
 import "./styles.css";
-import { tg } from "./tg";
+import { applyTheme, tg } from "./tg";
 
+applyTheme();
 tg?.ready();
 tg?.expand();
 

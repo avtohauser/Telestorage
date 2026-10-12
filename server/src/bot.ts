@@ -10,7 +10,7 @@ function openAppMarkup() {
   return new Api.ReplyInlineMarkup({
     rows: [
       new Api.KeyboardButtonRow({
-        buttons: [new Api.KeyboardButtonWebView({ text: "📂 Открыть хранилище", url: config.publicUrl })],
+        buttons: [new Api.KeyboardButtonWebView({ text: "Открыть avr cloud", url: config.publicUrl })],
       }),
     ],
   });
@@ -22,7 +22,7 @@ export async function setupBot() {
       .invoke(
         new Api.bots.SetBotMenuButton({
           userId: new Api.InputUserEmpty(),
-          button: new Api.BotMenuButton({ text: "Хранилище", url: config.publicUrl }),
+          button: new Api.BotMenuButton({ text: "Открыть", url: config.publicUrl }),
         }),
       )
       .catch((e) => console.warn("[bot] не удалось установить кнопку меню:", e.errorMessage || e));
@@ -33,8 +33,8 @@ export async function setupBot() {
         scope: new Api.BotCommandScopeDefault(),
         langCode: "",
         commands: [
-          new Api.BotCommand({ command: "start", description: "Открыть хранилище" }),
-          new Api.BotCommand({ command: "help", description: "Как пользоваться" }),
+          new Api.BotCommand({ command: "start", description: "Открыть avr cloud" }),
+          new Api.BotCommand({ command: "help", description: "Как это работает" }),
         ],
       }),
     )
@@ -46,9 +46,9 @@ export async function setupBot() {
 }
 
 const HELP =
-  "Это облачное хранилище на серверах Telegram.\n\n" +
-  "• Откройте приложение кнопкой ниже, чтобы загружать файлы, создавать папки и смотреть фото/видео.\n" +
-  "• Или просто пришлите мне фото, видео или документ — я сохраню их в корень хранилища.";
+  "avr cloud — ваше хранилище на серверах Telegram. Фото и видео — в оригинале, без сжатия.\n\n" +
+  "Откройте приложение кнопкой ниже: там загрузка, папки, галерея и ссылки для друзей.\n" +
+  "Или пришлите файл прямо сюда — сохраню его в «Мои файлы».";
 
 async function onMessage(e: NewMessageEvent) {
   const msg = e.message;
@@ -57,14 +57,14 @@ async function onMessage(e: NewMessageEvent) {
   // Помощь с настройкой: напишите /id в канале, где бот — админ.
   if (msg.isChannel && /^\/id(@\w+)?$/.test(text)) {
     const chatId = msg.chatId?.toString();
-    await msg.reply({ message: `ID этого канала: ${chatId?.startsWith("-") ? chatId : "-100" + chatId}\nУкажите его в STORAGE_CHANNEL_ID.` });
+    await msg.reply({ message: `ID этого канала: ${chatId?.startsWith("-") ? chatId : "-100" + chatId}\nУкажите его в STORAGE_CHANNEL_ID и перезапустите сервер.` });
     return;
   }
   if (!msg.isPrivate) return;
 
   const userId = Number(msg.senderId);
   if (!isAllowed(userId)) {
-    await msg.reply({ message: `⛔ Доступ закрыт. Ваш ID: ${userId}` });
+    await msg.reply({ message: `Доступ к этому хранилищу закрыт. Ваш ID — ${userId}, передайте его владельцу.` });
     return;
   }
 
@@ -75,11 +75,11 @@ async function onMessage(e: NewMessageEvent) {
 
   const info = mediaInfo(msg);
   if (!info) {
-    if (text) await msg.reply({ message: "Пришлите файл, фото или видео — я его сохраню.", buttons: openAppMarkup() });
+    if (text) await msg.reply({ message: "Пришлите файл, фото или видео — сохраню его в «Мои файлы».", buttons: openAppMarkup() });
     return;
   }
   if (!storageReady()) {
-    await msg.reply({ message: "Хранилище ещё не настроено администратором." });
+    await msg.reply({ message: "Хранилище ещё не настроено — владельцу нужно подключить канал." });
     return;
   }
 
@@ -103,5 +103,5 @@ async function onMessage(e: NewMessageEvent) {
     db.prepare("INSERT INTO file_parts (file_id, idx, message_id, size) VALUES (?, 0, ?, ?)").run(fileId, stored.id, storedInfo.size);
   });
   tx();
-  await msg.reply({ message: `✅ Сохранено: ${storedInfo.name}`, buttons: openAppMarkup() });
+  await msg.reply({ message: `Сохранено: ${storedInfo.name}`, buttons: openAppMarkup() });
 }

@@ -1,6 +1,8 @@
 import { useEffect, useRef } from "react";
 import type { FileItem } from "../api";
-import { fileIcon, formatSize } from "../format";
+import { Loader } from "../brand";
+import { formatSize } from "../format";
+import { fileIconName, Icon } from "./Icon";
 
 export function Viewer({ files, index, onIndex, onClose, onMore, onDownload }: {
   files: FileItem[];
@@ -42,53 +44,60 @@ export function Viewer({ files, index, onIndex, onClose, onMore, onDownload }: {
       }}
     >
       <div className="viewer-top">
-        <button className="icon-btn light" onClick={onClose} aria-label="Закрыть">
-          ✕
+        <button className="round-btn" onClick={onClose} aria-label="Закрыть">
+          <Icon name="close" />
         </button>
         <div className="viewer-title">
-          <div className="ellipsis">{file.name}</div>
-          <div className="small dim">
+          <div className="avr-title-sm ellipsis">{file.name}</div>
+          <div className="avr-body-sm dim num">
             {formatSize(file.size)} · {index + 1} из {files.length}
           </div>
         </div>
-        <button className="icon-btn light" onClick={() => onMore(file)} aria-label="Ещё">
-          ⋯
+        <button className="round-btn" onClick={() => onMore(file)} aria-label="Действия">
+          <Icon name="more" />
         </button>
       </div>
 
       <div className="viewer-body" key={file.id}>
         {!ready ? (
           <div className="viewer-doc">
-            <div className="big-icon">⏳</div>
-            <div>Файл ещё отправляется в Telegram…</div>
+            <Loader />
+            <div className="avr-body">Файл ещё отправляется в Telegram — откроется, как только будет готов.</div>
           </div>
         ) : file.kind === "image" ? (
-          <img src={file.url} alt={file.name} />
+          <img className="appear" src={file.url} alt={file.name} />
         ) : file.kind === "video" ? (
           <video src={file.url} controls autoPlay playsInline poster={file.thumbUrl || undefined} />
         ) : file.kind === "audio" ? (
           <div className="viewer-doc">
-            <div className="big-icon">🎵</div>
+            <div className="doc-tile">
+              <Icon name="audio" size={40} />
+            </div>
             <audio src={file.url} controls autoPlay />
           </div>
         ) : (
           <div className="viewer-doc">
-            <div className="big-icon">{fileIcon(file.kind, file.name)}</div>
-            <div className="ellipsis" style={{ maxWidth: "80vw" }}>{file.name}</div>
-            <div className="dim">{formatSize(file.size)}</div>
-            <button className="primary" onClick={() => onDownload(file)}>
+            <div className="doc-tile">
+              <Icon name={fileIconName(file.kind, file.name)} size={40} />
+            </div>
+            <div className="avr-title-sm ellipsis" style={{ maxWidth: "80vw" }}>
+              {file.name}
+            </div>
+            <div className="avr-body-sm dim num">{formatSize(file.size)}</div>
+            <button className="avr-btn" onClick={() => onDownload(file)}>
+              <Icon name="download" />
               Скачать
             </button>
           </div>
         )}
         {prev && (
-          <button className="nav-btn left" onClick={prev} aria-label="Назад">
-            ‹
+          <button className="nav-btn left" onClick={prev} aria-label="Предыдущий">
+            <Icon name="chevronLeft" />
           </button>
         )}
         {next && (
-          <button className="nav-btn right" onClick={next} aria-label="Вперёд">
-            ›
+          <button className="nav-btn right" onClick={next} aria-label="Следующий">
+            <Icon name="chevronRight" />
           </button>
         )}
       </div>
